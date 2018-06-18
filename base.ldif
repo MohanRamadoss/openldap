@@ -1,0 +1,65 @@
+dn: dc=apple,dc=com
+dc: apple
+objectClass: top
+objectClass: domain
+
+dn: ou=Hosts,dc=apple,dc=com
+ou: Hosts
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Rpc,dc=apple,dc=com
+ou: Rpc
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Services,dc=apple,dc=com
+ou: Services
+objectClass: top
+objectClass: organizationalUnit
+
+dn: nisMapName=netgroup.byuser,dc=apple,dc=com
+nismapname: netgroup.byuser
+objectClass: top
+objectClass: nisMap
+
+dn: ou=Mounts,dc=apple,dc=com
+ou: Mounts
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Networks,dc=apple,dc=com
+ou: Networks
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=People,dc=apple,dc=com
+ou: People
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Group,dc=apple,dc=com
+ou: Group
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Netgroup,dc=apple,dc=com
+ou: Netgroup
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Protocols,dc=apple,dc=com
+ou: Protocols
+objectClass: top
+objectClass: organizationalUnit
+
+dn: ou=Aliases,dc=apple,dc=com
+ou: Aliases
+objectClass: top
+objectClass: organizationalUnit
+
+dn: nisMapName=netgroup.byhost,dc=apple,dc=com
+nismapname: netgroup.byhost
+objectClass: top
+objectClass: nisMap
+

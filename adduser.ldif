@@ -1,0 +1,17 @@
+dn: uid=mohan,ou=People,dc=apple,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: mohan
+uid: mohan
+uidNumber: 9999
+gidNumber: 100
+homeDirectory: /home/mohan
+loginShell: /bin/bash
+gecos: Mohan [Admin (at) Apple]
+userPassword: {SSHA}uWC6jFxw/4nY3GEQfwf4Eh/cq13lvyKy
+shadowLastChange: 17058
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7

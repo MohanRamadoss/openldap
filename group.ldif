@@ -1,0 +1,302 @@
+dn: cn=root,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: root
+userPassword: {crypt}x
+gidNumber: 0
+
+dn: cn=bin,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: bin
+userPassword: {crypt}x
+gidNumber: 1
+
+dn: cn=daemon,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: daemon
+userPassword: {crypt}x
+gidNumber: 2
+
+dn: cn=sys,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: sys
+userPassword: {crypt}x
+gidNumber: 3
+
+dn: cn=adm,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: adm
+userPassword: {crypt}x
+gidNumber: 4
+
+dn: cn=tty,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: tty
+userPassword: {crypt}x
+gidNumber: 5
+
+dn: cn=disk,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: disk
+userPassword: {crypt}x
+gidNumber: 6
+
+dn: cn=lp,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lp
+userPassword: {crypt}x
+gidNumber: 7
+
+dn: cn=mem,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: mem
+userPassword: {crypt}x
+gidNumber: 8
+
+dn: cn=kmem,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: kmem
+userPassword: {crypt}x
+gidNumber: 9
+
+dn: cn=wheel,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: wheel
+userPassword: {crypt}x
+gidNumber: 10
+
+dn: cn=cdrom,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: cdrom
+userPassword: {crypt}x
+gidNumber: 11
+
+dn: cn=mail,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: mail
+userPassword: {crypt}x
+gidNumber: 12
+memberUid: postfix
+
+dn: cn=man,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: man
+userPassword: {crypt}x
+gidNumber: 15
+
+dn: cn=dialout,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: dialout
+userPassword: {crypt}x
+gidNumber: 18
+
+dn: cn=floppy,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: floppy
+userPassword: {crypt}x
+gidNumber: 19
+
+dn: cn=games,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: games
+userPassword: {crypt}x
+gidNumber: 20
+
+dn: cn=tape,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: tape
+userPassword: {crypt}x
+gidNumber: 30
+
+dn: cn=video,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: video
+userPassword: {crypt}x
+gidNumber: 39
+
+dn: cn=ftp,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: ftp
+userPassword: {crypt}x
+gidNumber: 50
+
+dn: cn=lock,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lock
+userPassword: {crypt}x
+gidNumber: 54
+
+dn: cn=audio,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: audio
+userPassword: {crypt}x
+gidNumber: 63
+
+dn: cn=nobody,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: nobody
+userPassword: {crypt}x
+gidNumber: 99
+
+dn: cn=users,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: users
+userPassword: {crypt}x
+gidNumber: 100
+
+dn: cn=utmp,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: utmp
+userPassword: {crypt}x
+gidNumber: 22
+
+dn: cn=utempter,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: utempter
+userPassword: {crypt}x
+gidNumber: 35
+
+dn: cn=ssh_keys,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: ssh_keys
+userPassword: {crypt}x
+gidNumber: 999
+
+dn: cn=input,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: input
+userPassword: {crypt}x
+gidNumber: 998
+
+dn: cn=systemd-journal,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: systemd-journal
+userPassword: {crypt}x
+gidNumber: 190
+
+dn: cn=systemd-network,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: systemd-network
+userPassword: {crypt}x
+gidNumber: 192
+
+dn: cn=dbus,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: dbus
+userPassword: {crypt}x
+gidNumber: 81
+
+dn: cn=polkitd,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: polkitd
+userPassword: {crypt}x
+gidNumber: 997
+
+dn: cn=postdrop,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: postdrop
+userPassword: {crypt}x
+gidNumber: 90
+
+dn: cn=postfix,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: postfix
+userPassword: {crypt}x
+gidNumber: 89
+
+dn: cn=sshd,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: sshd
+userPassword: {crypt}x
+gidNumber: 74
+
+dn: cn=ldap,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: ldap
+userPassword: {crypt}x
+gidNumber: 55
+
+dn: cn=saslauth,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: saslauth
+userPassword: {crypt}x
+gidNumber: 76
+
+dn: cn=lduser1,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser1
+userPassword: {crypt}x
+gidNumber: 5000
+
+dn: cn=lduser2,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser2
+userPassword: {crypt}x
+gidNumber: 5001
+
+dn: cn=lduser3,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser3
+userPassword: {crypt}x
+gidNumber: 5002
+
+dn: cn=lduser4,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser4
+userPassword: {crypt}x
+gidNumber: 5003
+
+dn: cn=lduser5,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser5
+userPassword: {crypt}x
+gidNumber: 5004
+
+dn: cn=lduser6,ou=Group,dc=apple,dc=com
+objectClass: posixGroup
+objectClass: top
+cn: lduser6
+userPassword: {crypt}x
+gidNumber: 5005
+
