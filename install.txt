@@ -1,0 +1,924 @@
+
+systemctl stop firewalld.service
+setenforce 0
+
+sed -i s/^SELINUX=enforcing/SELINUX=disabled/g /etc/selinux/config
+
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.1.70  master.apple.com master
+192.168.1.71  slave.apple.com  slave
+192.168.1.73  client1.apple.com client1
+192.168.1.74  client2.apple.com client2
+
+
+
+
+
+yum -y install openldap compat-openldap openldap-clients openldap-servers openldap-servers-sql openldap-devel migrationtools
+
+
+
+cd /etc/openldap/slapd.d
+
+rm -rf 
+
+cp /usr/share/openldap-servers/slapd.ldif /root/ldap/
+
+
+Set OpenLDAP admin password.
+# generate encrypted password
+
+slappasswd -s redhat -n > /etc/openldap/passwd
+
+
+slappasswd -h {SSHA} -s ldppassword
+
+
+
+[root@ldap ~]# slappasswd
+
+New password:
+
+Re-enter new password:
+
+[root@master ldap]# cat slapd.ldif
+#
+# See slapd-config(5) for details on configuration options.
+# This file should NOT be com readable.
+#
+
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcArgsFile: /var/run/openldap/slapd.args
+olcPidFile: /var/run/openldap/slapd.pid
+#
+# TLS settings
+#
+olcTLSCACertificatePath: /etc/openldap/certs
+olcTLSCertificateFile: "OpenLDAP Server"
+olcTLSCertificateKeyFile: /etc/openldap/certs/password
+#
+# Do not enable referrals until AFTER you have a working directory
+# service AND an understanding of referrals.
+#
+#olcReferral: ldap://root.openldap.org
+#
+# Sample security restrictions
+#       Require integrity protection (prevent hijacking)
+#       Require 112-bit (3DES or better) encryption for updates
+#       Require 64-bit encryption for simple bind
+#
+#olcSecurity: ssf=1 update_ssf=112 simple_bind=64
+
+
+#
+# Load dynamic backend modules:
+# - modulepath is architecture dependent value (32/64-bit system)
+# - back_sql.la backend requires openldap-servers-sql package
+# - dyngroup.la and dynlist.la cannot be used at the same time
+#
+
+#dn: cn=module,cn=config
+#objectClass: olcModuleList
+#cn: module
+#olcModulepath: /usr/lib/openldap
+#olcModulepath: /usr/lib64/openldap
+#olcModuleload: accesslog.la
+#olcModuleload: auditlog.la
+#olcModuleload: back_dnsapple.la
+#olcModuleload: back_ldap.la
+#olcModuleload: back_mdb.la
+#olcModuleload: back_meta.la
+#olcModuleload: back_null.la
+#olcModuleload: back_passwd.la
+#olcModuleload: back_relay.la
+#olcModuleload: back_shell.la
+#olcModuleload: back_sock.la
+#olcModuleload: collect.la
+#olcModuleload: constraint.la
+#olcModuleload: dds.la
+#olcModuleload: deref.la
+#olcModuleload: dyngroup.la
+#olcModuleload: dynlist.la
+#olcModuleload: memberof.la
+#olcModuleload: pcache.la
+#olcModuleload: ppolicy.la
+#olcModuleload: refint.la
+#olcModuleload: retcode.la
+#olcModuleload: rwm.la
+#olcModuleload: seqmod.la
+#olcModuleload: smbk5pwd.la
+#olcModuleload: sssvlv.la
+#olcModuleload: syncprov.la
+#olcModuleload: translucent.la
+#olcModuleload: unique.la
+#olcModuleload: valsort.la
+
+
+#
+# Schema settings
+#
+
+dn: cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: schema
+
+include: file:///etc/openldap/schema/corba.ldif
+include: file:///etc/openldap/schema/core.ldif
+include: file:///etc/openldap/schema/cosine.ldif
+include: file:///etc/openldap/schema/duaconf.ldif
+include: file:///etc/openldap/schema/dyngroup.ldif
+include: file:///etc/openldap/schema/inetorgperson.ldif
+include: file:///etc/openldap/schema/java.ldif
+include: file:///etc/openldap/schema/misc.ldif
+include: file:///etc/openldap/schema/nis.ldif
+include: file:///etc/openldap/schema/openldap.ldif
+include: file:///etc/openldap/schema/ppolicy.ldif
+include: file:///etc/openldap/schema/collective.ldif
+
+#
+# Frontend settings
+#
+
+dn: olcDatabase=frontend,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcFrontendConfig
+olcDatabase: frontend
+#
+# Sample global access control policy:
+#       Root DSE: allow anyone to read it
+#       Subschema (sub)entry DSE: allow anyone to read it
+#       Other DSEs:
+#               Allow self write access
+#               Allow authenticated users read access
+#               Allow anonymous users to authenticate
+#
+#olcAccess: to dn.base="" by * read
+#olcAccess: to dn.base="cn=Subschema" by * read
+#olcAccess: to *
+#       by self write
+#       by users read
+#       by anonymous auth
+#
+# if no access controls are present, the default policy
+# allows anyone and everyone to read anything but restricts
+# updates to rootdn.  (e.g., "access to * by * read")
+#
+# rootdn can always read and write EVERYTHING!
+#
+
+#
+# Configuration database
+#
+
+dn: olcDatabase=config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: config
+olcAccess: to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,c
+ n=auth" manage by * none
+
+#
+# Server status monitoring
+#
+
+dn: olcDatabase=monitor,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: monitor
+olcAccess: to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,c
+ n=auth" read by dn.base="cn=Manager,dc=apple,dc=com" read by * none
+
+#
+# Backend database definitions
+#
+
+dn: olcDatabase=hdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcHdbConfig
+olcDatabase: hdb
+olcSuffix: dc=apple,dc=com
+olcRootDN: cn=Manager,dc=apple,dc=com
+olcRootPW: {SSHA}Olj0EoeTV65mE/zjBMeaWG40PeOViBc2
+olcDbDirectory: /var/lib/ldap
+olcDbIndex: objectClass eq,pres
+olcDbIndex: ou,cn,mail,surname,givenname eq,pres,sub
+
+
+
+
+
+
+rm -rf /etc/openldap/slapd.d/*
+
+
+
+[root@master ldap]#  slapadd -F /etc/openldap/slapd.d/ -n 0 -l /root/ldap/slapd.ldif
+_#################### 100.00% eta   none elapsed            none fast!
+Closing DB...
+[root@master ldap]#
+
+
+
+
+
+
+
+[root@server home]# slaptest -u -F /etc/openldap/slapd.d/
+config file testing succeeded
+
+
+config file testing succeeded
+
+
+chown -Rv ldap.ldap /etc/openldap/slapd.d
+
+[root@server slapd.d]# chown -Rv ldap.ldap /etc/openldap/slapd.d/
+
+
+
+
+[root@master ldap]# cd /etc/openldap/slapd.d/
+[root@master slapd.d]# ls -la
+total 4
+drwxr-x---  3 ldap ldap  45 Jun 15 19:18 .
+drwxr-xr-x. 5 root root  92 Jun 15 19:07 ..
+drwxr-x---  3 ldap ldap 182 Jun 15 19:18 cn=config
+-rw-------  1 ldap ldap 589 Jun 15 19:18 cn=config.ldif
+[root@master slapd.d]#
+
+
+
+
+[root@master ldap]# systemctl start slapd.service
+[root@master ldap]# systemctl status slapd.service
+[root@master ldap]# systemctl enable slapd.service
+
+
+
+
+
+
+
+
+
+
+[root@master ldap]# cat create_user.sh
+#!/bin/bash
+USER_LIST=ldapuser.txt
+HOME_ldap=/home/ldapuser
+mkdir -pv $HOME_ldap
+for USERID in `awk '{print $1}' $USER_LIST`; do
+    USERNAME="`grep "$USERID" $USER_LIST | awk '{print $2}'`"
+    HOMEDIR=${HOME_ldap}/${USERNAME}
+    useradd $USERNAME -u $USERID -d $HOMEDIR
+    grep "$USERID" $USER_LIST | awk '{print $3}' | passwd --stdin $USERNAME
+done
+
+[root@master ldap]# cat ldapuser.txt
+5000 lduser1 123456
+5001 lduser2 123456
+5002 lduser3 123456
+5003 lduser4 123456
+5004 lduser5 123456
+5005 lduser6 123456
+[root@master ldap]#
+
+
+vim /usr/share/migrationtools/migrate_common.ph
+
+# Default DNS domain
+$DEFAULT_MAIL_DOMAIN = "apple.com";
+
+# Default base
+$DEFAULT_BASE = "dc=apple,dc=com";
+
+
+
+ vim /usr/share/migrationtools/migrate_common.ph
+/usr/share/migrationtools/migrate_base.pl > /root/ldap/base.ldif
+
+
+/usr/share/migrationtools/migrate_passwd.pl /etc/passwd /root/ldap/user.ldif
+cat /root/ldap/user.ldif
+/usr/share/migrationtools/migrate_group.pl /etc/group /root/ldap/group.ldif
+
+   
+
+   
+   
+ldapadd -D "cn=Manager,dc=apple,dc=com" -W -x -f base.ldif
+ldapadd -D "cn=Manager,dc=apple,dc=com" -W -x -f user.ldif
+ldapadd -D "cn=Manager,dc=apple,dc=com" -W -x -f group.ldif
+
+   
+
+yum -y install nfs-utils
+
+
+
+yum -y install nfs-utils
+
+[root@server ~]# cat /etc/exports
+/home/ldapuser 192.168.1.0/24(rw,sync)
+
+
+[root@server ~]# systemctl start nfs-server.service
+
+
+[root@client home]# exportfs -rv
+exporting *:/home/ldapuser  
+   
+   
+systemctl enable nfs-server.service      
+   
+   
+vi /etc/rsyslog.conf
+
+local4.*    /var/log/ldap.log 
+touch /var/log/ldap.log
+
+rsyslog：
+
+systemctl restart rsyslog.service
+
+slapd /var/log/messages
+
+systemctl status slapd.service -l
+
+tail -f /var/log/messages
+
+
+
+
+
+
+
+
+
+SSL SETUP IN LDAP 
+
+
+openssl req -nodes -sha256 -newkey rsa:2048 -keyout PrivateKey.key -out CertificateRequest.csr  
+
+2. Optional: Check to see if the CSR really has 256bit signatures
+
+openssl req -in CertificateRequest.csr -text -noout
+
+You should see “Signature Algorithm: sha256WithRSAEncryption”
+
+3. Create the certificate
+
+We use the CSR and sign it with the private key and create a public certificate
+
+openssl req -nodes -sha256 -newkey rsa:2048 -keyout PrivateKey.key -out CertificateRequest.csr
+openssl req -in CertificateRequest.csr -text -noout
+openssl x509 -req -days 365 -sha256 -in CertificateRequest.csr -signkey PrivateKey.key -out my256.crt
+
+
+
+cp my256.crt  /etc/openldap/certs/server.crt
+
+cp PrivateKey.key  /etc/openldap/certs/server.key 
+
+cp /etc/pki/tls/certs/ca-bundle.crt /etc/openldap/certs/
+
+cat my256.crt PrivateKey.key >> slave.pem 
+ 
+
+
+vi mod_ssl.ldif
+
+# create new
+dn: cn=config
+changetype: modify
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/openldap/certs/ca-bundle.crt
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/certs/server.crt
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/certs/server.key
+
+
+[root@master ldap]# ldapmodify -Y EXTERNAL -H ldapi:/// -f mod_ssl.ldif
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+modifying entry "cn=config"
+
+[root@master ldap]# vi /etc/sysconfig/slapd
+add 
+SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
+
+
+
+
+
+
+client end 
+
+
+[root@master ldap]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.1.70  master.apple.com master
+192.168.1.71  slave.apple.com  slave
+192.168.1.73  client1.apple.com client1
+192.168.1.74  client2.apple.com client2
+
+
+
+
+
+yum -y install sssd-ldap nss-pam-ldapd  nfs-utils
+
+authconfig-tui
+
+
+authconfig --enableldap --enableldapauth --ldapserver=ldaps://master.apple.com --ldapbasedn="dc=apple,dc=com" --enablemkhomedir --disableldaptls --update
+
+
+
+
+reate the c hash of the CA certificate.
+
+/etc/pki/tls/misc/c_hash /etc/openldap/cacerts/server.pem 
+
+Output:
+
+997ee4fb.0 => /etc/openldap/cacerts/server.pem 
+
+Now, symlink the rootCA.pem to the shown 8 digit hex number.
+
+ln -s /etc/openldap/cacerts/server.pem  997ee4fb.0
+
+
+[root@client1 ~]# echo "TLS_REQCERT allow" >> /etc/openldap/ldap.conf
+
+[root@client1 ~]# echo "tls_reqcert allow" >> /etc/nslcd.conf
+
+Restart the LDAP client service.
+
+systemctl restart nslcd
+
+
+
+
+[root@client1 ~]# getent passwd lduser1
+lduser1:x:5000:5000:lduser1:/home/ldapuser/lduser1:/bin/bash
+
+
+[root@client1 /]# mkdir -p /home/ldapuser
+[root@client1 /]# mount -t nfs 192.168.1.70:/home/ldapuser/ /home/ldapuser/
+[root@client1/]# cd /home/ldapuser/
+[root@client ldapuser]# ls
+lduser1  lduser2  lduser3  lduser4  lduser5  lduser6
+[root@client ldapuser]# su - lduser1
+Last login: Sat May 20 23:11:00 EDT 2017 on pts/0
+
+
+
+Configure LDAP Client for TLS connection.
+[root@client1 ~]# echo "TLS_REQCERT allow" >> /etc/openldap/ldap.conf
+
+[root@client1 ~]# echo "tls_reqcert allow" >> /etc/nslcd.conf
+
+[root@client1 ~]# authconfig --enableldaptls --update
+
+getsebool: SELinux is disabled
+
+
+scp server.pem root@client1:/tmp/
+
+
+
+
+
+Enable debug logging on CentOS 7 LDAP Server
+
+ 
+
+vi /root/ldap/logging.ldif
+------
+cat logging.ldif
+dn: cn=config
+replace: olcLogLevel
+olcLogLevel: -1
+------
+
+# apply
+ldapmodify -Y EXTERNAL -H ldapi:/// -f /root/ldap/logging.ldif
+
+# verify
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config -s base|grep -i LOG
+
+systemctl restart slapd
+
+vi /etc/rsyslog.conf
+------
+local4.* -/var/log/slapd.log
+------
+
+systemctl restart rsyslog
+
+vi /etc/logrotate.d/syslog
+-----
+# add this line
+/var/log/slapd.log
+
+
+
+
+
+[root@master ldap]# slappasswd
+New password:
+Re-enter new password:
+{SSHA}hbfwS2+203V3p+P6CB5n7nHVZpRB6ns+
+[root@master ldap]# vi adduser.ldif
+[root@master ldap]# cat adduser.ldif
+dn: uid=mohan,ou=People,dc=apple,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: mohan
+uid: mohan
+uidNumber: 9999
+gidNumber: 100
+homeDirectory: /home/mohan
+loginShell: /bin/bash
+gecos: Mohan [Admin (at) Apple]
+userPassword: {SSHA}hbfwS2+203V3p+P6CB5n7nHVZpRB6ns+
+shadowLastChange: 17058
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+[root@master ldap]# ldapadd -x -W -D cn=Manager,dc=apple,dc=com -W -f adduser.ldif
+Enter LDAP Password:
+adding new entry "uid=mohan,ou=People,dc=apple,dc=com"
+
+
+
+
+
+
+
+
+
+
+
+
+Master slave replication 
+root@master ldap]# cat rpuser.ldif
+dn: uid=rpuser,dc=apple,dc=com
+objectClass: simpleSecurityObject
+objectclass: account
+uid: rpuser
+description: Replication  User
+userPassword: root1234
+
+[root@master ldap]# ldapadd -x -W -D cn=Manager,dc=apple,dc=com -W -f rpuser.ldif
+Enter LDAP Password:
+adding new entry "uid=rpuser,dc=apple,dc=com"
+
+
+
+
+
+Configure LDAP Provider. Add syncprov module.
+[root@master ~]# vi mod_syncprov.ldif
+# create new
+
+dn: cn=module,cn=config
+objectClass: olcModuleList
+cn: module
+olcModulePath: /usr/lib64/openldap
+olcModuleLoad: syncprov.la
+
+[root@master ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f mod_syncprov.ldif
+
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=module,cn=config"
+
+[root@master ~]# vi syncprov.ldif
+# create new
+
+dn: olcOverlay=syncprov,olcDatabase={2}hdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpSessionLog: 100
+
+[root@master ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f syncprov.ldif
+
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "olcOverlay=syncprov,olcDatabase={2}hdb,cn=config"
+
+vi syncrepl.ldif 
+
+[root@slave ldap]# cat syncrepl.ldif
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcSyncRepl
+olcSyncRepl: rid=001
+  provider=ldap://192.168.1.70:389/
+  bindmethod=simple
+  binddn="uid=rpuser,dc=apple,dc=com"
+  credentials=root1234
+  searchbase="dc=apple,dc=com"
+  scope=sub
+  schemachecking=on
+  type=refreshAndPersist
+  retry="30 5 300 3"
+  interval=00:00:05:00
+[root@slave ldap]#
+
+
+
+Test the LDAP replication:
+
+Let’s create a user in LDAP called “ldaprptest“, to do that, create a .ldif file on the master LDAP server.
+
+[root@master ~]# vi ldaprptest.ldif
+
+Update the above file with below content.
+
+dn: uid=ldaprptest,ou=People,dc=apple,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: ldaprptest
+uid: ldaprptest
+uidNumber: 9988
+gidNumber: 100
+homeDirectory: /home/ldaprptest
+loginShell: /bin/bash
+gecos: LDAP Replication Test User
+userPassword: redhat123
+shadowLastChange: 17058
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+
+ldapsearch -x cn=ldaprptest -b  dc=apple,dc=com
+  
+  
+  
+Backup LDAP with slapcat on CentOS 7
+
+#!/bin/bash
+export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+set -e
+KEEP=7
+BASE_DN='dc=apple,dc=com'
+LDAPBK="ldap-$( date +%y%m%d-%H%M ).ldif"
+BACKUPDIR='/root/ldap-backup'
+test -d "$BACKUPDIR" || mkdir -p "$BACKUPDIR"
+slapcat -b "$BASE_DN" -l "$BACKUPDIR/$LDAPBK"
+gzip -9 "$BACKUPDIR/$LDAPBK"
+ls -1tr $BACKUPDIR/*.ldif.gz | head -n-$KEEP | xargs rm -
+
+
+
+
+
+
+
+
+
+
+ldapmodify -Y EXTERNAL  -H ldapi:/// -f monitor.ldif
+
+
+
+
+cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+chown ldap:ldap /var/lib/ldap/*
+
+
+Add the cosine and nis LDAP schemas.
+
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+
+
+Generate base.ldif file for your domain.
+
+vi base.ldif
+
+Use the below information. You can modify it according to your requirement.
+
+dn: dc=apple,dc=com
+dc: apple
+objectClass: top
+objectClass: domain
+
+dn: cn=ldapadm,dc=apple,dc=com
+objectClass: organizationalRole
+cn: ldapadm
+description: LDAP Manager
+
+
+dn: cn=Manager,dc=apple,dc=com
+objectClass: organizationalRole
+cn: Manager
+description: Directory Manager
+
+
+dn: ou=People,dc=apple,dc=com
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=apple,dc=com
+objectClass: organizationalUnit
+ou: Group
+
+
+
+Build the directory structure.
+
+ldapadd -x -W -D cn=Manager,dc=apple,dc=com -W -f base.ldif
+
+
+ldapsearch -x -W -D 'cn=Manager,dc=apple,dc=com ' -b "" -s base
+
+ldapsearch -x -b '' -s base '(objectclass=*)' namingContexts
+
+
+
+
+
+
+
+
+
+
+
+
+
+yum -y install openldap openldap-clients openldap-servers
+cp -p /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+systemctl start slapd
+firewall-cmd --add-service=ldap --zone=public --permanent
+firewall-cmd --reload
+
+
+yum install httpd mod_ssl  install php php-mbstring php-pear -y 
+yum -y install epel-release
+yum --enablerepo=epel -y install phpldapadmin
+
+  
+slappasswd -s redhat
+
+/usr/sbin/slapd -f /etc/openldap/slapd.conf
+
+vi slapd.conf
+
+
+include     /etc/openldap/schema/corba.schema
+include     /etc/openldap/schema/core.schema
+include     /etc/openldap/schema/cosine.schema
+include     /etc/openldap/schema/duaconf.schema
+include     /etc/openldap/schema/dyngroup.schema
+include     /etc/openldap/schema/inetorgperson.schema
+include     /etc/openldap/schema/java.schema
+include     /etc/openldap/schema/misc.schema
+include     /etc/openldap/schema/nis.schema
+include     /etc/openldap/schema/openldap.schema
+include     /etc/openldap/schema/ppolicy.schema
+include     /etc/openldap/schema/collective.schema
+
+allow bind_v2
+
+pidfile     /var/run/openldap/slapd.pid
+argsfile    /var/run/openldap/slapd.args
+
+#######################################################################
+# ldbm and/or bdb database definitions
+#######################################################################
+
+database    bdb
+suffix      "dc=apple,dc=com"
+checkpoint  1024 15
+rootdn      "cn=Manager,dc=apple,dc=com"
+rootpw      {SSHA}LEwuS4UTwCsGymRfDRClyP9+SYwn49AC
+
+directory   /var/lib/ldap
+
+index objectClass                       eq,pres
+index ou,cn,mail,surname,givenname      eq,pres,sub
+index uidNumber,gidNumber,loginShell    eq,pres
+index uid,memberUid                     eq,pres,sub
+index nisMapName,nisMapEntry            eq,pres,sub
+
+database monitor
+
+access to *
+        by dn.exact="cn=Manager,dc=apple,dc=com" read
+        by * none
+
+access to attrs=userPassword
+        by self write
+        by dn="cn=Manager,dc=apple,dc=com" write
+        by anonymous auth
+        by * none
+
+access to *
+        by dn="cn=Manager,dc=apple,dc=com" write
+        by self write
+        by * read
+
+database config
+access to *
+        by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+        by * none
+		
+		
+
+
+
+/usr/sbin/slapd -f /etc/openldap/slapd.conf
+
+slaptest -f /etc/openldap/slapd.conf
+
+
+rm -rf /etc/openldap/slapd.d/*
+slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d
+chown -R ldap. /etc/openldap/slapd.d
+systemctl restart slapd
+
+
+mkdir /root/ldap
+
+
+
+[root@slave ldap]# cat root.ldif
+dn: dc=apple,dc=com
+objectClass: dcObject
+objectClass: organization
+dc: example
+o: Example Corporation
+description: The Apple Corporation
+
+dn: cn=Manager,dc=apple,dc=com
+objectClass: organizationalRole
+cn: Manager
+description: Directory Manager
+
+
+dn: cn=Manager,dc=apple,dc=com
+cn: Manager
+sn: Manager
+objectclass: person
+
+dn: ou=People,dc=apple,dc=com
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=apple,dc=com
+objectClass: organizationalUnit
+ou: Group
+
+
+ldapadd -f root.ldif -x -D "cn=Manager,dc=apple,dc=com" -w redhat
+
+
+phymyadmin ldapexport 
+
+
+version: 1
+
+# Entry 1: dc=apple,dc=com
+dn: dc=apple,dc=com
+dc: apple
+o: My Apple Company
+objectclass: organization
+objectclass: dcObject
+
+# Entry 2: cn=Manager,dc=apple,dc=com
+dn: cn=Manager,dc=apple,dc=com
+cn: Manager
+objectclass: person
+sn: Manager
+
+# Entry 3: ou=Group,dc=apple,dc=com
+dn: ou=Group,dc=apple,dc=com
+objectclass: organizationalUnit
+ou: Group
+
+# Entry 4: ou=People,dc=apple,dc=com
+dn: ou=People,dc=apple,dc=com
+objectclass: organizationalUnit
+ou: People
+
+
+
